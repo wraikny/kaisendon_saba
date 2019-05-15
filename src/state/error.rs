@@ -2,6 +2,8 @@
 pub enum ErrorKind {
     #[fail(display = "failed to mutex access")]
     Poison,
+    #[fail(display = "failed to srde struct to json")]
+    SerdeJson,
 }
 
 /* ----------- failure boilerplate ----------- */
@@ -83,6 +85,14 @@ impl From<MyPoisonError> for Error {
     fn from(error: MyPoisonError) -> Error {
         Error {
             inner: error.context(ErrorKind::Poison),
+        }
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(error: serde_json::Error) -> Error {
+        Error {
+            inner: error.context(ErrorKind::SerdeJson),
         }
     }
 }

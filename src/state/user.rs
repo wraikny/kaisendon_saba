@@ -1,6 +1,16 @@
 #[derive(Debug, Serialize, Deserialize)]
 crate struct User {
-    crate id : u32
+    crate id : u32,
+    crate room_id : Option<u32>,
+}
+
+impl User {
+    crate fn new(id : u32) -> Self {
+        User {
+            id : id,
+            room_id : None,
+        }
+    }
 }
 
 #[derive(Debug)]

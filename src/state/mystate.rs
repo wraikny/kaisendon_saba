@@ -27,4 +27,10 @@ impl MyState {
             .map_err(MyPoisonError::from)
             .map_err(Error::from)
     }
+
+    pub fn add_newuser(&self) -> Result<u32, Error> {
+        let mut model = self.model()?;
+        let id = model.add_newuser();
+        Ok(id)
+    }
 }

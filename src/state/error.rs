@@ -1,6 +1,3 @@
-
-use std::sync::{PoisonError, MutexGuard};
-
 #[derive(Debug, Fail)]
 pub enum ErrorKind {
     #[fail(display = "failed to mutex access")]
@@ -60,10 +57,9 @@ impl From<Context<ErrorKind>> for Error {
 
 /* error translate */
 use std::sync;
-use failure::{SyncFailure};
 
 #[derive(Debug, Fail)]
-#[fail(display = "Poison was poisoned")]
+#[fail(display = "Mutex access was poisoned")]
 pub struct MyPoisonError {
     backtrace: Backtrace
 }

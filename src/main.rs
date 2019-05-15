@@ -4,14 +4,40 @@
 #[macro_use]
 extern crate rocket;
 
-/// GETがきたときに"Hello, world!"というレスポンスを返す
+use rocket::State;
+use std::sync::{Arc, Mutex};
+
+extern crate kaisendon_saba;
+use kaisendon_saba::model::{Model};
+
+struct MyState {
+    model : Arc<Mutex<Model>>
+}
+
+impl MyState {
+    fn new(model : Model) -> MyState {
+        MyState {
+            model : Arc::new(Mutex::new(model))
+        }
+    }
+}
+
+
 #[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+fn index(state: State<MyState>) -> String {
+    let mut model = state.model.lock().unwrap();
+    model.hoge[0] += 1;
+    format!("The config value is: {:?}", model)
 }
 
 fn main() {
+    let model = Model {
+        user_val: "user input".to_string(),
+        hoge : vec![1, 2, 3],
+    };
+
     rocket::ignite()
-        .mount("/", routes![index])  // ここにルーティングをセットする
+        .mount("/", routes![index])
+        .manage(MyState::new(model))
         .launch();
 }

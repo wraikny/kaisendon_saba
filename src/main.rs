@@ -6,27 +6,21 @@ extern crate rocket;
 
 use rocket::State;
 
-extern crate kaisendon_saba;
+// extern crate kaisendon_saba;
 use kaisendon_saba::state::{
-    model::{Model},
     mystate::{MyState},
 };
 
 #[get("/")]
 fn index(state: State<MyState>) -> String {
-    let mut model = state.model().unwrap();
-    model.hoge += 1;
-    format!("The config value is: {:?}", model)
+    format!("The config value is: {:?}", state)
 }
 
 fn main() {
-    let model = Model {
-        user_val: "user input".to_string(),
-        hoge : 0,
-    };
+    let mystate = MyState::new();
 
     rocket::ignite()
         .mount("/", routes![index])
-        .manage(MyState::new(model))
+        .manage(mystate)
         .launch();
 }

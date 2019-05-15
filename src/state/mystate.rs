@@ -90,7 +90,10 @@ impl MyState {
         
 
         let user = Box::new(user);
+        let user_json = serde_json::to_string(&user)?;
+
         waitings.get_shorter().push(user);
-        Ok(())
+        
+        Ok(user_json)
     }
 }

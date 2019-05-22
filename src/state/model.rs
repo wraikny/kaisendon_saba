@@ -91,13 +91,11 @@ impl Model {
     crate fn remove_user(&mut self, id: &UserID) -> bool {
         match self.users.remove(id) {
             Some(_) => {
-                self.rooms = self.rooms.clone().into_iter().filter_map(|(k, v)|{
-                    if v.lock().unwrap().contains(id) {
-                        None
-                    } else {
-                        Some( (k, v) )
+                for (r_id, room) in self.rooms.clone().into_iter() {
+                    if room.lock().unwrap().contains(&id) {
+                        self.rooms.remove(&r_id);
                     }
-                }).collect();
+                }
                 self.waitings.remove_user(id);
                 true
             },

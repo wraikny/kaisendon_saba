@@ -105,3 +105,29 @@ impl Model {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+        #[test]
+    fn add_remove_user() {
+        let mut model = super::Model::new();
+        let mut ids = Vec::new();
+
+        for i in 0..10 {
+            let id = model.add_newuser(&super::LoginInfo{ username: format!("hoge_{}", i) });
+            ids.push(id);
+        }
+
+        for id in ids.into_iter() {
+            model.remove_user(&id);
+        }
+
+        // let newModel = super::Model::new();
+        
+        assert_eq!(model.next_user_id, 10);
+        assert_eq!(model.users.len(), 0);
+        assert_eq!(model.next_room_id, 5);
+        assert_eq!(model.rooms.len(), 0);
+        assert_eq!(model.waitings.larger().len(), 0);
+    }
+}

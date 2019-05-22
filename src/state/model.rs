@@ -75,12 +75,12 @@ impl Model {
     crate fn add_newuser(&mut self, info : &LoginInfo) -> UserID {
         let id = self.create_user(info);
 
-        let shorter : &mut Vec<_> = self.waitings.get_shorter();
-        shorter.push(id);
+        let waitings : &mut Vec<_> = self.waitings.larger_mut();
+        waitings.push(id);
 
-        if shorter.len() == 2 {
-            let user1 = shorter.pop().unwrap();
-            let user2 = shorter.pop().unwrap();
+        if waitings.len() == 2 {
+            let user1 = waitings.pop().unwrap();
+            let user2 = waitings.pop().unwrap();
 
             let _ = self.create_room(user1, user2);
         }
@@ -91,11 +91,13 @@ impl Model {
     crate fn remove_user(&mut self, id: &UserID) -> bool {
         match self.users.remove(id) {
             Some(_) => {
-                for (key, val) in self.rooms.clone().into_iter() {
-                    if val.lock().unwrap().contains(id) {
-                        self.rooms.remove(&key);
+                self.rooms = self.rooms.clone().into_iter().filter_map(|(k, v)|{
+                    if v.lock().unwrap().contains(id) {
+                        None
+                    } else {
+                        Some( (k, v) )
                     }
-                }
+                }).collect();
                 self.waitings.remove_user(id);
                 true
             },

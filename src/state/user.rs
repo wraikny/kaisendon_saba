@@ -39,16 +39,16 @@ impl WaitingUsers {
         }
     }
 
-    crate fn get_longer(&mut self) -> &mut Vec<UserID> {
+    crate fn larger(&self) -> &Vec<UserID> {
         if self.losers.len() >= self.winners.len() {
-            &mut self.losers
+            &self.losers
         } else {
-            &mut self.winners
+            &self.winners
         }
     }
 
-    crate fn get_shorter(&mut self) -> &mut Vec<UserID> {
-        if self.losers.len() < self.winners.len() {
+    crate fn larger_mut(&mut self) -> &mut Vec<UserID> {
+        if self.losers.len() >= self.winners.len() {
             &mut self.losers
         } else {
             &mut self.winners

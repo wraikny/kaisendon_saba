@@ -108,7 +108,7 @@ impl Model {
 
 #[cfg(test)]
 mod test {
-        #[test]
+    #[test]
     fn add_remove_user() {
         let mut model = super::Model::new();
         let mut ids = Vec::new();

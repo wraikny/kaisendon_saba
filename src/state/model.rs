@@ -1,7 +1,14 @@
-use super::{
-    user::{User, WaitingUsers},
-    room::{Room},
+use super::super::{
     error::{ Error },
+};
+
+use super::{
+    user::{UserID, User, WaitingUsers},
+    room::{Room},
+};
+
+use super::super::json::{
+    login::LoginInfo,
 };
 
 use std::collections::{
@@ -10,12 +17,12 @@ use std::collections::{
 
 #[derive(Debug)]
 crate struct Model {
-    crate next_user_id : u32,
-    crate users : HashMap<u32, User>,
+    crate next_user_id : UserID,
+    crate users : HashMap<UserID, User>,
     crate waitings : WaitingUsers,
 
-    crate next_room_id : u32,
-    crate rooms : HashMap<u32, Room>,
+    // crate next_room_id : u32,
+    // crate rooms : HashMap<u32, Room>,
 }
 
 impl Model {
@@ -25,19 +32,19 @@ impl Model {
             users : HashMap::new(),
             waitings : WaitingUsers::new(),
 
-            next_room_id : 0,
-            rooms : HashMap::new(),
+            // next_room_id : 0,
+            // rooms : HashMap::new(),
         }
     }
 
-    crate fn add_newuser(&mut self) -> u32 {
+    crate fn add_newuser(&mut self, info : &LoginInfo) -> User {
         let id = self.next_user_id;
-        self.next_user_id += 1u32;
+        self.next_user_id += 1;
         self.waitings.get_shorter().push(id);
 
-        let user = User::new(id);
-        self.users.insert(id, user);
+        let user = User::new(id, &info.username);
+        self.users.insert(id, user.clone());
 
-        id
+        user
     }
 }

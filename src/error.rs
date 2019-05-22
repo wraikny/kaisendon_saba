@@ -1,9 +1,11 @@
-#[derive(Debug, Fail)]
+#[derive(Debug, Clone, Fail)]
 pub enum ErrorKind {
     #[fail(display = "failed to mutex access")]
     Poison,
     #[fail(display = "failed to srde struct to json")]
     SerdeJson,
+    #[fail(display = "unimplemented")]
+    UnImplemented,
 }
 
 /* ----------- failure boilerplate ----------- */
@@ -15,6 +17,14 @@ use failure::{Backtrace, Context, Fail};
 #[derive(Debug)]
 pub struct Error {
     inner: Context<ErrorKind>,
+}
+
+impl Clone for Error {
+    fn clone(&self) -> Error {
+        Error {
+            inner: Context::new(self.inner.get_context().clone())
+        }
+    }
 }
 
 impl Fail for Error {

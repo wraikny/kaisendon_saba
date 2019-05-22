@@ -1,7 +1,16 @@
 use std::sync::{Arc, Mutex, MutexGuard};
+
+use super::super::{
+    error::{ Error, MyPoisonError },
+};
+
 use super::{
     model::Model,
-    error::{ Error, MyPoisonError },
+    user::{UserID, User},
+};
+
+use super::super::json::{
+    login::LoginInfo,
 };
 
 #[derive(Debug)]
@@ -28,9 +37,13 @@ impl MyState {
             .map_err(Error::from)
     }
 
-    pub fn add_newuser(&self) -> Result<u32, Error> {
+    pub fn model_string(&self) -> String {
+        format!("{:?}", self.model())
+    }
+
+    pub fn add_newuser(&self, info : &LoginInfo) -> Result<User, Error> {
         let mut model = self.model()?;
-        let id = model.add_newuser();
-        Ok(id)
+        let user = model.add_newuser(info);
+        Ok(user)
     }
 }

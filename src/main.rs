@@ -26,7 +26,7 @@ use kaisendon_saba::{
 mod debug {
     #[get("/model")]
     pub fn model(state: super::State<super::MyState>) -> String {
-        println!("Model:\n{}", state.model_string());
+        state.print_model();
         format!("Debug Printed at server.")
     }
 }
@@ -40,14 +40,15 @@ fn index(state: State<MyState>) -> String {
 #[post("/login", data = "<info>")]
 fn login(info: Json<LoginInfo>, state: State<MyState>) -> Json<LoginResult> {
     match state.add_newuser(&info.0) {
-        Ok(user) =>
-            Json(LoginResult::success(user)),
+        Ok(id) =>
+            Json(LoginResult::success(id)),
         Err(e) => {
             dbg!(e.clone());
             Json(LoginResult::error(e.to_string()))
         },
     }
 }
+
 
 
 fn main() {

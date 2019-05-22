@@ -1,3 +1,7 @@
+use super::{
+    room::{RoomID},
+};
+
 pub type UserID = u32;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,6 +18,10 @@ impl User {
             name : name.to_owned(),
             room_id : None,
         }
+    }
+
+    crate fn set_room(&mut self, id: RoomID) {
+        self.room_id = Some(id);
     }
 }
 
@@ -45,5 +53,10 @@ impl WaitingUsers {
         } else {
             &mut self.winners
         }
+    }
+
+    crate fn remove_user(&mut self, user: &UserID) {
+        self.winners = self.winners.clone().into_iter().filter(|x| *x != *user).collect();
+        self.losers = self.losers.clone().into_iter().filter(|x| *x != *user).collect();
     }
 }

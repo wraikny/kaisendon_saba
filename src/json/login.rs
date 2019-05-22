@@ -17,16 +17,14 @@ pub mod result {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginResult {
     pub id: UserID,
-    pub username: String,
     pub error: i32,
     pub error_msg: String,
 }
 
 impl LoginResult {
-    pub fn success(user: User) -> LoginResult {
+    pub fn success(id: UserID) -> LoginResult {
         LoginResult {
-            id: user.id,
-            username: user.name,
+            id: id,
             error: result::SUCCESS,
             error_msg: "".to_owned(),
         }
@@ -35,7 +33,6 @@ impl LoginResult {
     pub fn error(msg: String) -> LoginResult {
         LoginResult {
             id: 0,
-            username: "".to_owned(),
             error: result::ERROR,
             error_msg: msg,
         }

@@ -17,6 +17,7 @@ use kaisendon_saba::{
     state::{
         mystate::{MyState},
         // user::{User},
+        setting::{Setting},
     },
     json::{
         login::{LoginInfo, LoginResult},
@@ -52,7 +53,8 @@ fn login(info: Json<LoginInfo>, state: State<MyState>) -> Json<LoginResult> {
 
 
 fn main() {
-    let mystate = MyState::new();
+    let setting = Setting::new( (12, 12) );
+    let mystate = MyState::new(setting);
 
     rocket::ignite()
         .mount("/", routes![index, login])

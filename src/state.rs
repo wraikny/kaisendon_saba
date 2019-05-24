@@ -1,4 +1,5 @@
 pub mod mystate;
-crate mod model;
-crate mod room;
+pub mod setting;
 pub mod user;
+
+crate mod model;

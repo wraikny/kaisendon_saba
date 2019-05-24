@@ -6,7 +6,8 @@ use super::super::{
 
 use super::{
     model::Model,
-    user::{UserID, User},
+    user::{UserID},
+    setting::{Setting},
 };
 
 use super::super::json::{
@@ -24,10 +25,10 @@ impl MyState {
         Arc::new(Mutex::new(item))
     }
 
-    pub fn new() -> Self {
+    pub fn new(setting : Setting) -> Self {
         MyState {
             log : Self::new_mutex(()),
-            model : Self::new_mutex(Model::new()),
+            model : Self::new_mutex(Model::new(setting)),
         }
     }
 
@@ -59,7 +60,8 @@ mod test {
     use std::sync::mpsc;
 
     fn init_state() -> super::MyState {
-        let state = super::MyState::new();
+        let setting = super::Setting::new((12, 12));
+        let state = super::MyState::new(setting);
 
         let (tx, rx) = mpsc::channel();
 

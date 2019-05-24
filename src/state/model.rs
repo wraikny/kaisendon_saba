@@ -1,14 +1,20 @@
-use super::super::{
-    error::{ Error },
-};
+// use super::super::{
+//     error::{ Error },
+// };
 
 use super::{
     user::{UserID, User, WaitingUsers},
-    room::{Room, RoomID},
+    setting::{Setting},
 };
 
-use super::super::json::{
-    login::LoginInfo,
+use super::super::{
+    json::{
+        login::LoginInfo,
+    },
+    game::{
+        RoomID,
+        room::{Room},
+    },
 };
 
 use std::collections::{
@@ -27,10 +33,12 @@ crate struct Model {
 
     crate next_room_id : RoomID,
     crate rooms : HashMap<RoomID, Arc<Mutex<Room>>>,
+
+    crate setting : Setting,
 }
 
 impl Model {
-    crate fn new() -> Model {
+    crate fn new(setting : Setting) -> Model {
         Model {
             next_user_id : 0,
             users : HashMap::new(),
@@ -38,6 +46,8 @@ impl Model {
 
             next_room_id : 0,
             rooms : HashMap::new(),
+
+            setting : setting,
         }
     }
 
@@ -59,7 +69,7 @@ impl Model {
         let id = self.next_room_id;
         self.next_room_id += 1;
 
-        let room = Arc::new(Mutex::new(Room::new(id, user1, user2)));
+        let room = Arc::new(Mutex::new(Room::new(id, &user1, &user2)));
         self.rooms.insert(id, room);
 
         self.user(&user1).unwrap().lock().unwrap().set_room(id);
@@ -108,7 +118,8 @@ impl Model {
 mod test {
     #[test]
     fn add_remove_user() {
-        let mut model = super::Model::new();
+        let setting = super::Setting::new((12, 12));
+        let mut model = super::Model::new(setting);
         let mut ids = Vec::new();
 
         for i in 0..10 {

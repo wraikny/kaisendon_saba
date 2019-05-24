@@ -1,5 +1,7 @@
-use super::{
-    room::{RoomID},
+use super::super::{
+    game::{
+        RoomID
+    },
 };
 
 pub type UserID = u32;

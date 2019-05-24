@@ -1,6 +1,6 @@
 use super::super::{
     state::{
-        user::{UserID, User},
+        user::{UserID},
     }
 };
 

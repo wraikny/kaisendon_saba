@@ -8,5 +8,6 @@ extern crate serde_derive;
 extern crate serde_json;
 
 pub mod state;
+crate mod game;
 pub mod json;
 pub mod error;

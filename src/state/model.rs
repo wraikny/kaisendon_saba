@@ -21,18 +21,14 @@ use std::collections::{
     HashMap,
 };
 
-use std::{
-    sync::{Arc, Mutex}
-};
-
 #[derive(Debug)]
 crate struct Model {
     crate next_user_id : UserID,
-    crate users : HashMap<UserID, Arc<Mutex<User>>>,
+    crate users : HashMap<UserID, User>,
     crate waitings : WaitingUsers,
 
     crate next_room_id : RoomID,
-    crate rooms : HashMap<RoomID, Arc<Mutex<Room>>>,
+    crate rooms : HashMap<RoomID, Room>,
 
     crate setting : Setting,
 }
@@ -51,15 +47,15 @@ impl Model {
         }
     }
 
-    crate fn user(&self, id: &UserID) -> Option<&Arc<Mutex<User>>> {
-        self.users.get(id)
+    crate fn user(&mut self, id: &UserID) -> Option<&mut User> {
+        self.users.get_mut(id)
     }
 
     fn create_user(&mut self, info: &LoginInfo) -> UserID {
         let id = self.next_user_id;
         self.next_user_id += 1;
 
-        let user = Arc::new(Mutex::new(User::new(id, &info.username)));
+        let user = User::new(id, &info.username);
         self.users.insert(id, user);
 
         id
@@ -69,17 +65,17 @@ impl Model {
         let id = self.next_room_id;
         self.next_room_id += 1;
 
-        let room = Arc::new(Mutex::new(Room::new(id, &user1, &user2)));
+        let room = Room::new(id, &user1, &user2);
         self.rooms.insert(id, room);
 
-        self.user(&user1).unwrap().lock().unwrap().set_room(id);
-        self.user(&user2).unwrap().lock().unwrap().set_room(id);
+        self.user(&user1).unwrap().set_room(id);
+        self.user(&user2).unwrap().set_room(id);
 
         id
     }
 
-    crate fn room(&self, id: &RoomID) -> Option<&Arc<Mutex<Room>>> {
-        self.rooms.get(id)
+    crate fn room(&mut self, id: &RoomID) -> Option<&mut Room> {
+        self.rooms.get_mut(id)
     }
 
     crate fn add_newuser(&mut self, info : &LoginInfo) -> UserID {
@@ -101,12 +97,19 @@ impl Model {
     crate fn remove_user(&mut self, id: &UserID) -> bool {
         match self.users.remove(id) {
             Some(_) => {
-                for (r_id, room) in self.rooms.clone().into_iter() {
-                    if room.lock().unwrap().contains(&id) {
-                        self.rooms.remove(&r_id);
-                    }
+                let remove_ids =
+                    self.rooms.iter()
+                        .filter(|x| x.1.contains(&id))
+                        .map(|x| x.0.clone())
+                        .collect::<Vec<_>>()
+                        .into_iter();
+                
+                for r_id in remove_ids {
+                    self.rooms.remove(&r_id);
                 }
+                
                 self.waitings.remove_user(id);
+                
                 true
             },
             None => false,

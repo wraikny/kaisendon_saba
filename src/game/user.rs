@@ -8,7 +8,7 @@ use super::super::{
         user::{UserID},
     },
     json::{
-        game::{Attack, AttackKind, AttackResult},
+        game::{Attack, AttackKind, AttackkerResult, ReceiverResult},
     }
 };
 
@@ -21,7 +21,6 @@ crate struct User {
     crate id : UserID,
     crate cells : HashMap<Cell, ShipID>,
 
-    crate next_ship_id : ShipID,
     crate ships : HashMap<ShipID, Ship>
 }
 
@@ -31,15 +30,12 @@ impl User {
             id : id.clone(),
             cells : HashMap::new(),
 
-            next_ship_id : 0,
             ships : HashMap::new(),
         }
     }
 
     fn add_ship(&mut self, ship : &Ship) {
-        let id = self.next_ship_id;
-        self.next_ship_id += 1;
-
+        let id = ship.id;
         self.ships.insert(id, ship.clone());
         for cell in ship.cells.iter() {
             self.cells.insert(cell.clone(), id);
@@ -52,8 +48,9 @@ impl User {
         }
     }
 
-    crate fn receive_attack(&mut self, attack : &Attack) -> AttackResult {
+    crate fn receive_attack(&mut self, attack : Attack) -> (AttackkerResult, ReceiverResult) {
         let mut results = Vec::new();
+        let mut destroyed_ships = Vec::new();
 
         for (cell, p) in attack.cells.iter() {
             match self.cells.get(cell).cloned() {
@@ -69,6 +66,7 @@ impl User {
                         self.ships.remove(&ship_id);
 
                         results.push((*cell, AttackKind::Destroy));
+                        destroyed_ships.push(ship_id);
                     } else {
                         results.push((*cell, AttackKind::Hit));
                     }
@@ -79,6 +77,7 @@ impl User {
             }
         }
 
-        AttackResult { cells : results }
+        ( AttackkerResult { cells : results }
+        , ReceiverResult {attack, destroyed_ships})
     }
 }

@@ -13,7 +13,7 @@ use super::super::{
         user::{UserID},
     },
     json::{
-        game::{Attack, AttackResult},
+        game::{Attack, AttackkerResult, ReceiverResult},
     }
 };
 
@@ -55,7 +55,7 @@ impl Room {
         user.add_ships(ships);
     }
 
-    crate fn attack(&mut self, target : &UserKind, attack : &Attack) -> AttackResult {
+    crate fn attack(&mut self, target : &UserKind, attack : Attack) -> (AttackkerResult, ReceiverResult) {
         let user = self.user_mut(target);
         user.receive_attack(attack)
     }

@@ -4,6 +4,8 @@ use super::super::{
     },
 };
 
+use std::collections::{VecDeque};
+
 pub type UserID = u32;
 
 #[derive(Debug, Clone)]
@@ -11,6 +13,8 @@ pub struct User {
     pub id : UserID,
     pub name : String,
     crate room_id : Option<u32>,
+
+    jsons : VecDeque<String>,
 }
 
 impl User {
@@ -19,11 +23,24 @@ impl User {
             id : id,
             name : name.to_owned(),
             room_id : None,
+            jsons : VecDeque::new(),
         }
     }
 
     crate fn set_room(&mut self, id: RoomID) {
         self.room_id = Some(id);
+    }
+
+    crate fn push_json(&mut self, json : String) {
+        self.jsons.push_back(json);
+    }
+
+    crate fn pop_jsons(&mut self) -> Vec<String> {
+        let result = self.jsons.clone().into_iter().collect();
+        
+        self.jsons.clear();
+
+        result
     }
 }
 

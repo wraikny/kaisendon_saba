@@ -4,7 +4,7 @@ use super::super::{
     }
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct LoginInfo {
     pub username: String
 }
@@ -14,7 +14,7 @@ pub mod result {
     pub const ERROR: i32 = 1;
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct LoginResult {
     pub id: UserID,
     pub error: i32,

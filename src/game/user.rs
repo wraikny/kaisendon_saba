@@ -1,6 +1,6 @@
 use super::{
     Cell, ShipID,
-    ship::{Ship, Attack},
+    ship::{Ship},
 };
 
 use super::super::{
@@ -8,7 +8,7 @@ use super::super::{
         user::{UserID},
     },
     json::{
-        game::{AttackKind, AttackResult},
+        game::{Attack, AttackKind, AttackResult},
     }
 };
 
@@ -60,10 +60,12 @@ impl User {
                 Some(ship_id) => {
                     let ship = self.ships.get_mut(&ship_id).unwrap();
                     ship.hp -= p;
+
                     if ship.hp <= 0 {
                         for cell in ship.cells.iter() {
                             self.cells.remove(cell);
                         }
+
                         self.ships.remove(&ship_id);
 
                         results.push((*cell, AttackKind::Destroy));

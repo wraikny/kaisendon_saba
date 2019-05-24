@@ -6,7 +6,7 @@ use super::super::{
 
 pub type UserID = u32;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct User {
     pub id : UserID,
     pub name : String,

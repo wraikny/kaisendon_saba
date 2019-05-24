@@ -8,8 +8,13 @@ use super::{
     user::{User},
 };
 
-use super::super::state::{
-    user::{UserID},
+use super::super::{
+    state::{
+        user::{UserID},
+    },
+    json::{
+        game::{Attack, AttackResult},
+    }
 };
 
 crate enum UserKind {
@@ -45,8 +50,13 @@ impl Room {
         }
     }
 
-    fn add_ships(&mut self, kind : &UserKind, ships : &Vec<Ship>) {
+    crate fn add_ships(&mut self, kind : &UserKind, ships : &Vec<Ship>) {
         let user = self.get_user(kind);
         user.add_ships(ships);
+    }
+
+    crate fn attack(&mut self, target : &UserKind, attack : &Attack) -> AttackResult {
+        let user = self.get_user(target);
+        user.receive_attack(attack)
     }
 }

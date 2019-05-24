@@ -50,6 +50,16 @@ impl Room {
         }
     }
 
+    fn userkind_by_id(&mut self, id : &UserID) -> Option<UserKind> {
+        if self.user1.id == *id {
+            Some(UserKind::User1)
+        } else if self.user2.id == *id {
+            Some(UserKind::User2)
+        } else {
+            None
+        }
+    }
+
     crate fn add_ships(&mut self, kind : &UserKind, ships : &Vec<Ship>) {
         let user = self.user_mut(kind);
         user.add_ships(ships);

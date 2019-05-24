@@ -43,7 +43,7 @@ impl Room {
         self.user1.id == *user || self.user2.id == *user
     }
 
-    fn get_user(&mut self, kind : &UserKind) -> &mut User {
+    fn user_mut(&mut self, kind : &UserKind) -> &mut User {
         match *kind {
             UserKind::User1 => &mut self.user1,
             UserKind::User2 => &mut self.user2,
@@ -51,12 +51,12 @@ impl Room {
     }
 
     crate fn add_ships(&mut self, kind : &UserKind, ships : &Vec<Ship>) {
-        let user = self.get_user(kind);
+        let user = self.user_mut(kind);
         user.add_ships(ships);
     }
 
     crate fn attack(&mut self, target : &UserKind, attack : &Attack) -> AttackResult {
-        let user = self.get_user(target);
+        let user = self.user_mut(target);
         user.receive_attack(attack)
     }
 }

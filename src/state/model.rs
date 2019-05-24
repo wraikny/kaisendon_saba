@@ -47,7 +47,7 @@ impl Model {
         }
     }
 
-    crate fn user(&mut self, id: &UserID) -> Option<&mut User> {
+    crate fn user_mut(&mut self, id: &UserID) -> Option<&mut User> {
         self.users.get_mut(id)
     }
 
@@ -68,13 +68,13 @@ impl Model {
         let room = Room::new(id, &user1, &user2);
         self.rooms.insert(id, room);
 
-        self.user(&user1).unwrap().set_room(id);
-        self.user(&user2).unwrap().set_room(id);
+        self.user_mut(&user1).unwrap().set_room(id);
+        self.user_mut(&user2).unwrap().set_room(id);
 
         id
     }
 
-    crate fn room(&mut self, id: &RoomID) -> Option<&mut Room> {
+    crate fn room_mut(&mut self, id: &RoomID) -> Option<&mut Room> {
         self.rooms.get_mut(id)
     }
 

@@ -23,7 +23,7 @@ crate enum UserKind {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 crate struct Room {
     crate id: RoomID,
     crate user1 : User,

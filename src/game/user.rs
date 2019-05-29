@@ -16,7 +16,7 @@ use std::collections::{
     HashMap,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 crate struct User {
     crate id : UserID,
     crate cells : HashMap<Cell, ShipID>,

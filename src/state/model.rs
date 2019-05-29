@@ -9,12 +9,14 @@ use super::{
 
 use super::super::{
     json::{
-        login::LoginInfo,
+        self,
+        LoginInfo,
     },
     game::{
         RoomID,
         room::{Room},
     },
+    error::{ErrorKind, Error}
 };
 
 use std::collections::{
@@ -47,8 +49,20 @@ impl Model {
         }
     }
 
+    crate fn user(&self, id: &UserID) -> Option<User> {
+        self.users.get(id).cloned()
+    }
+
     crate fn user_mut(&mut self, id: &UserID) -> Option<&mut User> {
         self.users.get_mut(id)
+    }
+
+    pub fn user_json(&self, id: &UserID) -> Option<json::User> {
+        let user = self.user(id)?;
+        Some(json::User {
+            id: user.id,
+            name: user.name,
+        })
     }
 
     fn create_user(&mut self, info: &LoginInfo) -> UserID {
@@ -74,8 +88,25 @@ impl Model {
         id
     }
 
+    crate fn room(&self, id: &RoomID) -> Option<Room> {
+        self.rooms.get(id).cloned()
+    }
+
     crate fn room_mut(&mut self, id: &RoomID) -> Option<&mut Room> {
         self.rooms.get_mut(id)
+    }
+
+    crate fn room_json(&self, id: &RoomID) -> Option<json::Room> {
+        let room = self.room(id)?;
+        let user1 = self.user_json(&room.user1.id)?;
+        
+        let user2 = self.user_json(&room.user2.id)?;
+
+        Some(json::Room {
+            id: room.id,
+            user1: user1,
+            user2: user2,
+        })
     }
 
     crate fn add_newuser(&mut self, info : &LoginInfo) -> UserID {

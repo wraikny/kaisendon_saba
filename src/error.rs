@@ -6,6 +6,8 @@ pub enum ErrorKind {
     SerdeJson,
     #[fail(display = "unimplemented")]
     UnImplemented,
+    #[fail(display = "Option::None")]
+    Optional,
 }
 
 /* ----------- failure boilerplate ----------- */

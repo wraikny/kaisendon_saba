@@ -1,17 +1,22 @@
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use super::super::{
-    error::{ Error, MyPoisonError },
+    error::{ ErrorKind, Error, MyPoisonError },
+    game::{
+        RoomID,
+    },
+    json,
+    // json::{User, Room},
 };
 
 use super::{
     model::Model,
-    user::{UserID},
+    user::{UserID, User},
     setting::{Setting},
 };
 
 use super::super::json::{
-    login::LoginInfo,
+    LoginInfo, UserInfo,
 };
 
 #[derive(Debug, Clone)]
@@ -42,6 +47,11 @@ impl MyState {
         println!("{:?}", self.model());
     }
 
+    pub fn user(&self, id: &UserID) -> Result<User, Error> {
+        self.model()?.user(id)
+            .ok_or(ErrorKind::Optional.into())
+    }
+
     pub fn add_newuser(&self, info : &LoginInfo) -> Result<UserID, Error> {
         let mut model = self.model()?;
         let id = model.add_newuser(info);
@@ -51,6 +61,21 @@ impl MyState {
     pub fn remove_user(&self, id: &UserID) -> Result<bool, Error> {
         let mut model = self.model()?;
         Ok(model.remove_user(id))
+    }
+
+    pub fn check_waiting(&self, id: &UserID) -> Result<json::UserWaitingState, Error> {
+        let model = self.model()?;
+        let user = (model.user(id).ok_or(ErrorKind::Optional.into()) as Result<User, Error>)?;
+        match user.room_id {
+            Some(room_id) => {
+                let room = (model.room_json(&room_id)
+                    .ok_or(ErrorKind::Optional.into()) as Result<json::Room, Error>)?;
+                Ok(json::UserWaitingState::InRoom(room))
+            },
+            None => {
+                Ok(json::UserWaitingState::Waiting)
+            },
+        }
     }
 }
 

@@ -4,7 +4,7 @@
 #[macro_use]
 extern crate rocket;
 
-extern crate rocket_contrib;
+extern crate serde_json;
 
 use rocket::{
     State,
@@ -15,12 +15,19 @@ use rocket_contrib::json::Json;
 // extern crate kaisendon_saba;
 use kaisendon_saba::{
     state::{
+        user::{
+            UserID,
+        },
         mystate::{MyState},
         // user::{User},
         setting::{Setting},
     },
     json::{
-        login::{LoginInfo, LoginResult},
+        JsonResult,
+        login::{
+            LoginInfo,
+            LogoutInfo,
+        },
     }
 };
 
@@ -39,13 +46,25 @@ fn index(state: State<MyState>) -> String {
 
 
 #[post("/login", data = "<info>")]
-fn login(info: Json<LoginInfo>, state: State<MyState>) -> Json<LoginResult> {
+fn login(info: Json<LoginInfo>, state: State<MyState>) -> Json<JsonResult<UserID, String>> {
     match state.add_newuser(&info.0) {
         Ok(id) =>
-            Json(LoginResult::success(id)),
+            Json(JsonResult::Ok(id)),
         Err(e) => {
             dbg!(e.clone());
-            Json(LoginResult::error(e.to_string()))
+            Json(JsonResult::Err(e.to_string()))
+        },
+    }
+}
+
+#[post("/logout", data = "<info>")]
+fn logout(info : Json<LogoutInfo>, state: State<MyState>) -> Json<JsonResult<bool, String>> {
+    match state.remove_user(&info.id) {
+        Ok(result) =>
+            Json(JsonResult::Ok(result)),
+        Err(e) => {
+            dbg!(e.clone());
+            Json(JsonResult::Err(e.to_string()))
         },
     }
 }
@@ -61,4 +80,18 @@ fn main() {
         .mount("/debug", routes![debug::model])
         .manage(mystate)
         .launch();
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn result_json() {
+        let r : Result<i32, String> = Ok(0);
+        let e : Result<i32, String> = Err("error".to_owned());
+
+        let json_r = super::Json(r);
+        let json_e = super::Json(e);
+        println!("{:?}", json_r.into_string());
+        println!("{:?}", json_e);
+    }
 }

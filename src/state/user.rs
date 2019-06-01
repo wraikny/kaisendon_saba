@@ -70,11 +70,28 @@ impl WaitingUsers {
         }
     }
 
-    crate fn larger_mut(&mut self) -> &mut Vec<UserID> {
+    fn larger_mut(&mut self) -> &mut Vec<UserID> {
         if self.losers.len() >= self.winners.len() {
             &mut self.losers
         } else {
             &mut self.winners
+        }
+    }
+
+    crate fn push_user(&mut self, id: UserID) {
+        let larger = self.larger_mut();
+        larger.push(id);
+    }
+
+    crate fn pop_pair(&mut self) -> Option<(UserID, UserID)> {
+        let larger = self.larger_mut();
+        if larger.len() == 2 {
+            let user1 = larger.pop().unwrap();
+            let user2 = larger.pop().unwrap();
+
+            Some((user1, user2))
+        } else {
+            None
         }
     }
 

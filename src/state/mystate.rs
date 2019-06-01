@@ -125,9 +125,11 @@ mod test {
         for i in 0..10 {
             let (state, tx) = (state.clone(), tx.clone());
             thread::spawn(move || {
-                state.add_newuser(&super::LoginInfo {
-                    username: format!("user_{}", i),
-                });
+                state
+                    .add_newuser(&super::LoginInfo {
+                        username: format!("user_{}", i),
+                    })
+                    .unwrap();
                 tx.send(()).unwrap();
             });
         }
@@ -156,7 +158,7 @@ mod test {
             for i in 0..10 {
                 let (state, tx) = (state.clone(), tx.clone());
                 thread::spawn(move || {
-                    state.remove_user(&i);
+                    state.remove_user(&i).unwrap();
                     tx.send(()).unwrap();
                 });
             }

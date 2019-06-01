@@ -1,11 +1,15 @@
 use crate::{
-    game::{room::Room, ship::Ship, RoomID},
+    game::{
+        room::{Room, UserKind},
+        ship::Ship,
+        RoomID,
+    },
     json::{
         self,
-
-        game::{Attack},
+        game::{Attack, GameFinish},
         LoginInfo,
     },
+
     // error::{
     //     ErrorKind,
     //     Error,
@@ -16,7 +20,7 @@ use crate::{
     },
 };
 
-use serde::{Serialize};
+use serde::Serialize;
 
 extern crate serde_json;
 
@@ -56,7 +60,7 @@ impl Model {
         self.users.get_mut(id)
     }
 
-    crate fn user_push_json<T : Serialize>(&mut self, id: &UserID, obj : &T) -> Result<(), String> {
+    crate fn user_push_json<T: Serialize>(&mut self, id: &UserID, obj: &T) -> Result<(), String> {
         let user = self
             .user_mut(id)
             .ok_or(format!("User({}) is not found", id))?;
@@ -111,11 +115,9 @@ impl Model {
         self.rooms.get_mut(id)
     }
 
-    fn room_of_user(&mut self, id: &UserID) -> Result<&mut Room, String> {
+    fn room_id_of_user(&self, id: &UserID) -> Result<RoomID, String> {
         let user = self.user(id).ok_or("UserID is not found")?;
-        let room_id = user.room_id.ok_or("User is not in room")?;
-        let room = self.room_mut(&room_id).ok_or("Room is not found")?;
-        Ok(room)
+        user.room_id.ok_or("User is not in room".to_owned())
     }
 
     crate fn room_json(&self, id: &RoomID) -> Option<json::Room> {
@@ -131,18 +133,34 @@ impl Model {
         })
     }
 
+    fn check_new_room(&mut self) -> Option<RoomID> {
+        self.waitings
+            .pop_pair()
+            .map(|(a, b)| self.create_room(a, b))
+    }
+
+    fn remove_room(&mut self, id: &RoomID) -> bool {
+        match self.rooms.remove(id) {
+            Some(room) => {
+                let (id1, id2) = room.user_ids();
+                self.waitings.push_user(id1);
+                self.waitings.push_user(id2);
+
+                let _ = self.check_new_room();
+                let _ = self.check_new_room();
+
+                true
+            }
+            None => false,
+        }
+    }
+
     crate fn add_newuser(&mut self, info: &LoginInfo) -> UserID {
         let id = self.create_user(info);
 
-        let waitings: &mut Vec<_> = self.waitings.larger_mut();
-        waitings.push(id);
+        self.waitings.push_user(id);
 
-        if waitings.len() == 2 {
-            let user1 = waitings.pop().unwrap();
-            let user2 = waitings.pop().unwrap();
-
-            let _ = self.create_room(user1, user2);
-        }
+        let _ = self.check_new_room();
 
         id
     }
@@ -171,27 +189,53 @@ impl Model {
     }
 
     crate fn add_ships(&mut self, id: &UserID, ships: &Vec<Ship>) -> Result<(), String> {
-        let room = self.room_of_user(id)?;
+        let room_id = self.room_id_of_user(id)?;
+        let room = self.room_mut(&room_id).ok_or("Room not found")?;
         let user_kind = room.userkind_by_id(id).expect("User is not found in Room");
         room.add_ships(&user_kind, ships);
         Ok(())
     }
 
+    crate fn check_room_is_finished(
+        &self,
+        id: &RoomID,
+        receiver: &UserKind,
+    ) -> Result<bool, String> {
+        let room = self.room(id).ok_or("Room not found")?;
+
+        let receiver_user = room.user(receiver);
+
+        Ok(receiver_user.ships.len() == 0)
+    }
+
     crate fn attack(&mut self, attack: Attack) -> Result<(), String> {
         let attacker_id = attack.attacker_id;
-        let room = self.room_of_user(&attacker_id)?;
+        let room_id = self.room_id_of_user(&attacker_id)?;
+        let room = self.room_mut(&room_id).ok_or("Room not found")?;
+
         let kind_attacker = room
             .userkind_by_id(&attacker_id)
             .ok_or("User is not found in Room")?;
-        
-        let kind_taret = kind_attacker.rev();
 
-        let target_id = room.user(&kind_taret).id;
+        let kind_target = kind_attacker.rev();
 
-        let (attacker_result, receiver_result) = room.attack(&kind_taret, attack);
-        
+        let target_id = room.user(&kind_target).id;
+
+        let (attacker_result, receiver_result) = room.attack(&kind_target, attack);
+
         self.user_push_json(&attacker_id, &attacker_result)?;
         self.user_push_json(&target_id, &receiver_result)?;
+
+        let is_finished = self.check_room_is_finished(&room_id, &kind_target)?;
+
+        if is_finished {
+            self.user_push_json(&attacker_id, &GameFinish::new(true))?;
+            self.user_push_json(&target_id, &GameFinish::new(false))?;
+
+            let _ = self.remove_room(&room_id);
+        }
+        // let receiver_ships_count = room.user(&kind_target).ships.len();
+
         Ok(())
     }
 }

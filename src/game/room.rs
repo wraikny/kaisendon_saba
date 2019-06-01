@@ -35,6 +35,10 @@ impl Room {
         }
     }
 
+    crate fn user_ids(&self) -> (UserID, UserID) {
+        (self.user1.id, self.user2.id)
+    }
+
     crate fn contains(&self, user: &UserID) -> bool {
         self.user1.id == *user || self.user2.id == *user
     }

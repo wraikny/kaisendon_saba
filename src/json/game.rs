@@ -39,3 +39,14 @@ pub struct ReceiverResult {
     pub attack : Attack,
     pub destroyed_ships : Vec<ShipID>,
 }
+
+#[derive(Debug, Serialize)]
+pub struct GameFinish {
+    pub is_win: bool,
+}
+
+impl GameFinish {
+    crate fn new(is_win: bool) -> Self {
+        GameFinish { is_win }
+    }
+}

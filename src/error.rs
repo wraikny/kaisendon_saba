@@ -8,6 +8,8 @@ pub enum ErrorKind {
     UnImplemented,
     #[fail(display = "Option::None")]
     Optional,
+    #[fail(display = "string error")]
+    String(String),
 }
 
 /* ----------- failure boilerplate ----------- */

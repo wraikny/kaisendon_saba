@@ -1,11 +1,24 @@
 use crate::{
     game::{
-        Cell, ShipID, AttackPoint
+        Cell, ShipID, ship::Ship, AttackPoint
+    },
+    state::{
+        user::{
+            UserID,
+        }
     },
 };
 
+#[derive(Debug, Deserialize)]
+pub struct Ships {
+    pub id: UserID,
+    pub ships: Vec<Ship>,
+}
+
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Attack {
+    pub attacker_id : UserID,
     pub cells : Vec<(Cell, AttackPoint)>,
 }
 

@@ -4,6 +4,8 @@ use crate::{
     },
 };
 
+use serde::{Serialize};
+
 use std::collections::{VecDeque};
 
 pub type UserID = u32;
@@ -31,8 +33,10 @@ impl User {
         self.room_id = Some(id);
     }
 
-    crate fn push_json(&mut self, json : String) {
+    crate fn push_json<T : Serialize>(&mut self, obj : &T) -> Result<(), String> {
+        let json = serde_json::to_string(obj).map_err(|e| format!("{}", e))?;
         self.jsons.push_back(json);
+        Ok(())
     }
 
     crate fn pop_jsons(&mut self) -> Vec<String> {

@@ -14,6 +14,7 @@ use crate::{
         // setting::{Setting},
     },
     json::{
+        User,
         JsonResult,
         LoginInfo,
         UserInfo,
@@ -25,8 +26,8 @@ use crate::{
 };
 
 #[get("/")]
-pub fn index(state: State<MyState>) -> String {
-    format!("State: {:?}", state)
+pub fn index() -> String {
+    format!("Welcome to kaisendon")
 }
 
 
@@ -59,4 +60,14 @@ pub fn logout(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<bo
 #[post("/waiting", data = "<info>")]
 pub fn waiting(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<UserWaitingState, String>> {
     Json(state.check_waiting(&info.id).into())
+}
+
+#[post("/user", data = "<info>")]
+pub fn get_user(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<User, String>> {
+    Json(state.get_user_json(&info.id).into())
+}
+
+#[post("/queue", data = "<info>")]
+pub fn jsons_queue(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<Vec<String>, String>> {
+    Json(state.user_pop_jsons(&info.id).into())
 }

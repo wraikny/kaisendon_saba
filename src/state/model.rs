@@ -2,12 +2,9 @@ use crate::{
     game::{room::Room, ship::Ship, RoomID},
     json::{
         self,
+
+        game::{Attack},
         LoginInfo,
-        game::{
-            Attack,
-            AttackkerResult,
-            ReceiverResult,
-        },
     },
     // error::{
     //     ErrorKind,
@@ -18,6 +15,10 @@ use crate::{
         user::{User, UserID, WaitingUsers},
     },
 };
+
+use serde::{Serialize};
+
+extern crate serde_json;
 
 use std::collections::HashMap;
 
@@ -55,7 +56,23 @@ impl Model {
         self.users.get_mut(id)
     }
 
-    pub fn user_json(&self, id: &UserID) -> Option<json::User> {
+    crate fn user_push_json<T : Serialize>(&mut self, id: &UserID, obj : &T) -> Result<(), String> {
+        let user = self
+            .user_mut(id)
+            .ok_or(format!("User({}) is not found", id))?;
+
+        user.push_json(obj)
+    }
+
+    crate fn user_pop_jsons(&mut self, id: &UserID) -> Result<Vec<String>, String> {
+        let user = self
+            .user_mut(id)
+            .ok_or(format!("User({}) is not found", id))?;
+
+        Ok(user.pop_jsons())
+    }
+
+    crate fn user_json(&self, id: &UserID) -> Option<json::User> {
         let user = self.user(id)?;
         Some(json::User {
             id: user.id,
@@ -97,7 +114,7 @@ impl Model {
     fn room_of_user(&mut self, id: &UserID) -> Result<&mut Room, String> {
         let user = self.user(id).ok_or("UserID is not found")?;
         let room_id = user.room_id.ok_or("User is not in room")?;
-        let room = self.room_mut(&room_id).expect("Room is not found");
+        let room = self.room_mut(&room_id).ok_or("Room is not found")?;
         Ok(room)
     }
 
@@ -160,13 +177,22 @@ impl Model {
         Ok(())
     }
 
+    crate fn attack(&mut self, attack: Attack) -> Result<(), String> {
+        let attacker_id = attack.attacker_id;
+        let room = self.room_of_user(&attacker_id)?;
+        let kind_attacker = room
+            .userkind_by_id(&attacker_id)
+            .ok_or("User is not found in Room")?;
+        
+        let kind_taret = kind_attacker.rev();
 
-    crate fn attack(&mut self, self_id: &UserID, attack: Attack) -> Result<(AttackkerResult, ReceiverResult), String> {
-        let room = self.room_of_user(self_id)?;
-        let target = room.userkind_by_id(self_id)
-            .expect("User is not found in Room")
-            .rev();
-        Ok(room.attack(&target, attack))
+        let target_id = room.user(&kind_taret).id;
+
+        let (attacker_result, receiver_result) = room.attack(&kind_taret, attack);
+        
+        self.user_push_json(&attacker_id, &attacker_result)?;
+        self.user_push_json(&target_id, &receiver_result)?;
+        Ok(())
     }
 }
 

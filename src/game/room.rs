@@ -39,6 +39,13 @@ impl Room {
         self.user1.id == *user || self.user2.id == *user
     }
 
+    crate fn user(&self, kind: &UserKind) -> &User {
+        match *kind {
+            UserKind::User1 => &self.user1,
+            UserKind::User2 => &self.user2,
+        }
+    }
+
     fn user_mut(&mut self, kind: &UserKind) -> &mut User {
         match *kind {
             UserKind::User1 => &mut self.user1,

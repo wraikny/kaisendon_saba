@@ -1,49 +1,49 @@
 use crate::{
+    game::{room::Room, ship::Ship, RoomID},
     json::{
         self,
         LoginInfo,
+        game::{
+            Attack,
+            AttackkerResult,
+            ReceiverResult,
+        },
     },
-    game::{
-        RoomID,
-        room::{Room},
-    },
-    error::{
-        ErrorKind,
-        Error,
-    },
+    // error::{
+    //     ErrorKind,
+    //     Error,
+    // },
     state::{
-        user::{UserID, User, WaitingUsers},
-        setting::{Setting},
+        setting::Setting,
+        user::{User, UserID, WaitingUsers},
     },
 };
 
-use std::collections::{
-    HashMap,
-};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 crate struct Model {
-    crate next_user_id : UserID,
-    crate users : HashMap<UserID, User>,
-    crate waitings : WaitingUsers,
+    crate next_user_id: UserID,
+    crate users: HashMap<UserID, User>,
+    crate waitings: WaitingUsers,
 
-    crate next_room_id : RoomID,
-    crate rooms : HashMap<RoomID, Room>,
+    crate next_room_id: RoomID,
+    crate rooms: HashMap<RoomID, Room>,
 
-    crate setting : Setting,
+    crate setting: Setting,
 }
 
 impl Model {
-    crate fn new(setting : Setting) -> Model {
+    crate fn new(setting: Setting) -> Model {
         Model {
-            next_user_id : 0,
-            users : HashMap::new(),
-            waitings : WaitingUsers::new(),
+            next_user_id: 0,
+            users: HashMap::new(),
+            waitings: WaitingUsers::new(),
 
-            next_room_id : 0,
-            rooms : HashMap::new(),
+            next_room_id: 0,
+            rooms: HashMap::new(),
 
-            setting : setting,
+            setting: setting,
         }
     }
 
@@ -90,14 +90,21 @@ impl Model {
         self.rooms.get(id).cloned()
     }
 
-    crate fn room_mut(&mut self, id: &RoomID) -> Option<&mut Room> {
+    fn room_mut(&mut self, id: &RoomID) -> Option<&mut Room> {
         self.rooms.get_mut(id)
+    }
+
+    fn room_of_user(&mut self, id: &UserID) -> Result<&mut Room, String> {
+        let user = self.user(id).ok_or("UserID is not found")?;
+        let room_id = user.room_id.ok_or("User is not in room")?;
+        let room = self.room_mut(&room_id).expect("Room is not found");
+        Ok(room)
     }
 
     crate fn room_json(&self, id: &RoomID) -> Option<json::Room> {
         let room = self.room(id)?;
         let user1 = self.user_json(&room.user1.id)?;
-        
+
         let user2 = self.user_json(&room.user2.id)?;
 
         Some(json::Room {
@@ -107,10 +114,10 @@ impl Model {
         })
     }
 
-    crate fn add_newuser(&mut self, info : &LoginInfo) -> UserID {
+    crate fn add_newuser(&mut self, info: &LoginInfo) -> UserID {
         let id = self.create_user(info);
 
-        let waitings : &mut Vec<_> = self.waitings.larger_mut();
+        let waitings: &mut Vec<_> = self.waitings.larger_mut();
         waitings.push(id);
 
         if waitings.len() == 2 {
@@ -126,23 +133,40 @@ impl Model {
     crate fn remove_user(&mut self, id: &UserID) -> bool {
         match self.users.remove(id) {
             Some(_) => {
-                let remove_ids =
-                    self.rooms.iter()
-                        .filter(|x| x.1.contains(&id))
-                        .map(|x| x.0.clone())
-                        .collect::<Vec<_>>()
-                        .into_iter();
-                
+                let remove_ids = self
+                    .rooms
+                    .iter()
+                    .filter(|x| x.1.contains(&id))
+                    .map(|x| x.0.clone())
+                    .collect::<Vec<_>>()
+                    .into_iter();
+
                 for r_id in remove_ids {
                     self.rooms.remove(&r_id);
                 }
-                
+
                 self.waitings.remove_user(id);
-                
+
                 true
-            },
+            }
             None => false,
         }
+    }
+
+    crate fn add_ships(&mut self, id: &UserID, ships: &Vec<Ship>) -> Result<(), String> {
+        let room = self.room_of_user(id)?;
+        let user_kind = room.userkind_by_id(id).expect("User is not found in Room");
+        room.add_ships(&user_kind, ships);
+        Ok(())
+    }
+
+
+    crate fn attack(&mut self, self_id: &UserID, attack: Attack) -> Result<(AttackkerResult, ReceiverResult), String> {
+        let room = self.room_of_user(self_id)?;
+        let target = room.userkind_by_id(self_id)
+            .expect("User is not found in Room")
+            .rev();
+        Ok(room.attack(&target, attack))
     }
 }
 
@@ -155,7 +179,9 @@ mod test {
         let mut ids = Vec::new();
 
         for i in 0..10 {
-            let id = model.add_newuser(&super::LoginInfo{ username: format!("hoge_{}", i) });
+            let id = model.add_newuser(&super::LoginInfo {
+                username: format!("hoge_{}", i),
+            });
             ids.push(id);
         }
 
@@ -164,7 +190,7 @@ mod test {
         }
 
         // let newModel = super::Model::new();
-        
+
         assert_eq!(model.next_user_id, 10);
         assert_eq!(model.users.len(), 0);
         assert_eq!(model.next_room_id, 5);

@@ -2,9 +2,9 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use crate::{
     error::{ ErrorKind, Error, MyPoisonError },
-    game::{
-        RoomID,
-    },
+    // game::{
+    //     RoomID,
+    // },
     json,
     state::{
         model::Model,
@@ -12,7 +12,7 @@ use crate::{
         setting::{Setting},
     },
     json::{
-        LoginInfo, UserInfo,
+        LoginInfo, // UserInfo,
     },
 };
 

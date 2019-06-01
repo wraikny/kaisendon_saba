@@ -19,9 +19,9 @@ use crate::{
         UserInfo,
         UserWaitingState,
     },
-    game::{
-        RoomID,
-    },
+    // game::{
+    //     RoomID,
+    // },
 };
 
 #[get("/")]

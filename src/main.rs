@@ -19,6 +19,7 @@ use kaisendon_saba::{
     },
     mount::{
         index::*,
+        game,
     }
 };
 
@@ -36,8 +37,8 @@ fn main() {
     let mystate = MyState::new(setting);
 
     rocket::ignite()
-        .mount("/", routes![index, login, logout, waiting])
-        .mount("/game", routes![])
+        .mount("/", routes![index, login, logout, waiting, user, pop_queue])
+        .mount("/game", routes![game::add_ships, game::attack])
         .mount("/debug", routes![debug::model])
         .manage(mystate)
         .launch();

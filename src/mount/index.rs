@@ -62,12 +62,12 @@ pub fn waiting(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<U
     Json(state.check_waiting(&info.id).into())
 }
 
-#[post("/user", data = "<info>")]
-pub fn get_user(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<User, String>> {
-    Json(state.get_user_json(&info.id).into())
+#[get("/user/<id>")]
+pub fn user(id: UserID, state: State<MyState>) -> Json<JsonResult<User, String>> {
+    Json(state.get_user_json(&id).into())
 }
 
-#[post("/queue", data = "<info>")]
-pub fn jsons_queue(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<Vec<String>, String>> {
+#[post("/pop_queue", data = "<info>")]
+pub fn pop_queue(info: Json<UserInfo>, state: State<MyState>) -> Json<JsonResult<Vec<String>, String>> {
     Json(state.user_pop_jsons(&info.id).into())
 }

@@ -13,7 +13,7 @@ pub enum JsonResult<T, E> {
     Err(E),
 }
 
-impl<T, E> From<Result<T, E>> for JsonResult<T, String> 
+impl<T, E> From<Result<T, E>> for JsonResult<T, String>
     where E : std::string::ToString,
 {
     fn from(r: Result<T, E>) -> Self {

@@ -1,13 +1,4 @@
-// use super::super::{
-//     error::{ Error },
-// };
-
-use super::{
-    user::{UserID, User, WaitingUsers},
-    setting::{Setting},
-};
-
-use super::super::{
+use crate::{
     json::{
         self,
         LoginInfo,
@@ -16,7 +7,14 @@ use super::super::{
         RoomID,
         room::{Room},
     },
-    error::{ErrorKind, Error}
+    error::{
+        ErrorKind,
+        Error,
+    },
+    state::{
+        user::{UserID, User, WaitingUsers},
+        setting::{Setting},
+    },
 };
 
 use std::collections::{

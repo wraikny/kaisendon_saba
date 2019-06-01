@@ -1,15 +1,14 @@
-use super::{
-    Cell, ShipID,
-    ship::{Ship},
-};
-
-use super::super::{
+use crate::{
     state::{
         user::{UserID},
     },
     json::{
         game::{Attack, AttackKind, AttackkerResult, ReceiverResult},
-    }
+    },
+    game::{
+        Cell, ShipID,
+        ship::{Ship},
+    },
 };
 
 use std::collections::{

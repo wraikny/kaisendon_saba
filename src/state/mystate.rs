@@ -1,22 +1,19 @@
 use std::sync::{Arc, Mutex, MutexGuard};
 
-use super::super::{
+use crate::{
     error::{ ErrorKind, Error, MyPoisonError },
     game::{
         RoomID,
     },
     json,
-    // json::{User, Room},
-};
-
-use super::{
-    model::Model,
-    user::{UserID, User},
-    setting::{Setting},
-};
-
-use super::super::json::{
-    LoginInfo, UserInfo,
+    state::{
+        model::Model,
+        user::{UserID, User},
+        setting::{Setting},
+    },
+    json::{
+        LoginInfo, UserInfo,
+    },
 };
 
 #[derive(Debug, Clone)]

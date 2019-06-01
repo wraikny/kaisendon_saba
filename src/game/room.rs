@@ -1,20 +1,15 @@
-// use super::super::{
-//     error::{ Error },
-// };
-
-use super::{
-    RoomID,
-    ship::{Ship},
-    user::{User},
-};
-
-use super::super::{
+use crate::{
     state::{
         user::{UserID},
     },
     json::{
         game::{Attack, AttackkerResult, ReceiverResult},
-    }
+    },
+    game::{
+        RoomID,
+        ship::{Ship},
+        user::{User},
+    },
 };
 
 crate enum UserKind {

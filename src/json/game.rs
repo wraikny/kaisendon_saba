@@ -1,5 +1,7 @@
-use super::super::game::{
-    Cell, ShipID, AttackPoint
+use crate::{
+    game::{
+        Cell, ShipID, AttackPoint
+    },
 };
 
 #[derive(Debug, Serialize, Deserialize)]
